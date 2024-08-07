@@ -91,7 +91,7 @@ async def get_menu_from_command (date: str) -> tuple[bool, str]:
         if not success:
             return False, date
 
-    menu = get_or_insert_menu_in_cache(date)
+    menu = await get_or_insert_menu_in_cache(date)
 
     return True, format_menu(menu)
 
