@@ -120,6 +120,6 @@ async def verify_this_week_and_get_fish () -> tuple[bool, str]:
         return False, "Ótima noticia! Não tem peixe essa semana."
 
     output_msg = "Para tristeza geral da nação, teremos peixe nos seguintes dias:\n\n"
-    output_msg += "\n* ".join(fish_days)
+    output_msg += "\n".join(fish_days)
 
     return True, output_msg
