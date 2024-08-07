@@ -1,0 +1,9 @@
+flask==3.0.3
+dataclasses_json==0.6.6
+playwright==1.41.2
+gunicorn==22.0.0
+gevent==24.2.1
+redis==5.0.4
+requests==2.31.0
+pytz==2021.3
+python-dotenv==1.0.0

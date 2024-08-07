@@ -1,0 +1,17 @@
+services:
+  bandeco-bot:
+    container_name: bandeco-bot
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3579:3579"
+    networks:
+      - network
+    volumes:
+      - .:/bandeco
+    restart: always
+    command: ["gunicorn", "--chdir", "app/", "-c", "app/gunicorn_config.py", "wsgi:app"]
+
+networks:
+  network:
