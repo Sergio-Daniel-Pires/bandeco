@@ -114,7 +114,7 @@ async def verify_this_week_and_get_fish () -> tuple[bool, str]:
 
         for values in menu.values():
             if "peixe" in (protein := values.get("protein")).lower() and protein is not None:
-                fish_days.append(f"*{date}: {protein}*")
+                fish_days.append(f"{date}: {protein.capitalize()}")
 
     if len(fish_days) == 0:
         return False, "Ótima noticia! Não tem peixe essa semana."
