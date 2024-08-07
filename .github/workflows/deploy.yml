@@ -23,7 +23,7 @@ jobs:
           cd app
 
           # Update env vars
-          echo "REDIS_URL={{ secrets.REDIS_CONN }}" > .env
+          echo "REDIS_URL=${{ secrets.REDIS_CONN }}" > .env
           echo "WHATSAPP_API_TOKEN=${{ secrets.WHATSAPP_API_TOKEN }}" >> .env
           echo "WHATSAPP_VERIFY_TOKEN=${{ secrets.WHATSAPP_VERIFY_TOKEN }}" >> .env
 
