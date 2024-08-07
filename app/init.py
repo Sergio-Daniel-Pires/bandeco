@@ -44,7 +44,7 @@ async def get_specific_day (bot: WhatsappBot, incoming: Incoming) -> int:
     return START
 
 async def verify_fish_in_menu (bot: WhatsappBot, incoming: Incoming) -> int:
-    success, fish_menu_msg = await verify_this_week_and_get_fish(message)
+    success, fish_menu_msg = await verify_this_week_and_get_fish()
 
     if not success:
         logger.error(f"Error getting menu: {fish_menu_msg}")
