@@ -6,9 +6,8 @@ import re
 from typing import Any
 
 import pytz
-
-from .get_menu import BotBase
-from .redis_conn import get_cached_menu, set_menu_on_cache
+from get_menu import BotBase
+from redis_conn import get_cached_menu, set_menu_on_cache
 
 locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 
