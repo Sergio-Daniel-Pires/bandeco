@@ -1,12 +1,16 @@
 import datetime as dt
 import json
+import locale
 import logging
 import re
 from typing import Any
 
 import pytz
-from get_menu import BotBase
-from redis_conn import get_cached_menu, set_menu_on_cache
+
+from .get_menu import BotBase
+from .redis_conn import get_cached_menu, set_menu_on_cache
+
+locale.setlocale(locale.LC_TIME, "pt_BR.UTF-8")
 
 REGEX_DATE = r"/dia\s*([0-9]{0,2})(-|\/)([0-9]{0,2})"
 
@@ -115,16 +119,20 @@ async def verify_this_week_and_get_fish () -> tuple[bool, str]:
         for title, values in menu.items():
             if "peixe" in (protein := values.get("protein", "")).lower() and protein is not None:
                 parsed_date = dt.datetime.strptime(date, "%Y-%m-%d")
+                weekday = parsed_date.strftime("%A")
                 user_friendly_date = parsed_date.strftime("%d/%m")
-                food_time = "Almoço" if "almoço" in title.lower() else "Jantar"
+                food_time = "Jantar" if "jantar" in title.lower() else "Almoço"
 
-                fish_days.append(f"{food_time} - {parsed_date.capitalize()} ({user_friendly_date}): {protein.capitalize()}")
+                fish_days.append(
+                    f"{food_time} - {weekday.capitalize()} ({user_friendly_date}): "
+                    f"{protein.capitalize()}"
+                )
 
     if len(fish_days) == 0:
         return False, "Ótima noticia! Não tem peixe essa semana."
 
     output_msg = "Para tristeza geral da nação, teremos peixe nos seguintes dias:\n\n"
-    output_msg += "* 🐟"
+    output_msg += "* 🐟\n"
     output_msg += "\n* ".join(fish_days)
 
     return True, output_msg
