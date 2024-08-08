@@ -123,14 +123,14 @@ async def verify_this_week_and_get_fish () -> tuple[bool, str]:
                 food_time = "Jantar" if "jantar" in title.lower() else "Almoço"
 
                 fish_days.append(
-                    f"{food_time} - {weekday.capitalize()} ({user_friendly_date}): "
+                    f"{food_time} na {weekday.capitalize()} ({user_friendly_date}): "
                     f"{protein.capitalize()}"
                 )
 
     if len(fish_days) == 0:
         return False, "Ótima noticia! Não tem peixe essa semana."
 
-    output_msg = "Para tristeza geral da nação, teremos 🐟 peixe essa semana:\n\n"
+    output_msg = "🐟 Para tristeza geral da nação, teremos peixe essa semana:\n\n"
     output_msg += "Dias de peixe:\n* "
     output_msg += "\n* ".join(fish_days)
 
