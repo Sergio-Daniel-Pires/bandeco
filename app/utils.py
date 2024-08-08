@@ -112,14 +112,17 @@ async def verify_this_week_and_get_fish () -> tuple[bool, str]:
     for date in remaining_days:
         menu = await get_or_insert_menu_in_cache(date)
 
-        for values in menu.values():
-            if "peixe" in (protein := values.get("protein")).lower() and protein is not None:
-                fish_days.append(f"{date}: {protein.capitalize()}")
+        for title, values in menu.items():
+            if "peixe" in (protein := values.get("protein", "")).lower() and protein is not None:
+                user_friendly_date = dt.datetime.strptime(date, "%Y-%m-%d").strftime("%d/%m")
+                food_time = "Almoço" if "almoço" in title.lower() else "Jantar"
+                fish_days.append(f"{food_time} {user_friendly_date}: {protein.capitalize()}")
 
     if len(fish_days) == 0:
         return False, "Ótima noticia! Não tem peixe essa semana."
 
     output_msg = "Para tristeza geral da nação, teremos peixe nos seguintes dias:\n\n"
-    output_msg += "\n".join(fish_days)
+    output_msg += "* 🐟"
+    output_msg += "\n* ".join(fish_days)
 
     return True, output_msg
