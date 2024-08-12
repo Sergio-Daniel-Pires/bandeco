@@ -16,7 +16,7 @@ START = range(1)
 async def main ():
     from init import initialize_bot
 
-    bot = WhatsappBot(verify_token="", whatsapp_token="EAAP4fM5pvHEBO9gFfZC0ZBv6bf8pIEZAZC5dlsWVTP5QH2CWZAAlfZCWSClsoxFrpKsrmRmlyFJ0KaTZCpJDVa6B9qskZAbkzBEoi0UB6NMIPmO44xSm2ndMa27ZCRn5NKNx0CXBVjKZBUZCQZClDgdWHwPXgkiEkQP26KN8ju37UEuxvzwONqYtIlrXv5HwW78bJ9vL")
+    bot = WhatsappBot(verify_token="", whatsapp_token="")
     await initialize_bot(bot)
 
     bot.start_webhook(port=3000)
