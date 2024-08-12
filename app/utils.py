@@ -116,7 +116,9 @@ async def verify_this_week_and_get_fish () -> tuple[bool, str]:
         menu = await get_or_insert_menu_in_cache(date)
 
         for title, values in menu.items():
-            if "peixe" in (protein := values.get("protein", "")).lower() and protein is not None:
+            protein = values.get("protein", "").lower()
+
+            if ("peixe" in protein or "pesca" in protein) and protein is not None:
                 parsed_date = dt.datetime.strptime(date, "%Y-%m-%d")
                 weekday = parsed_date.strftime("%A")
                 user_friendly_date = parsed_date.strftime("%d/%m")
