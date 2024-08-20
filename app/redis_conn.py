@@ -6,7 +6,7 @@ from typing import Any
 import config
 import redis
 
-REDIS_PREFIX = "menu"
+REDIS_PREFIX = "bandeco:menu"
 
 logger = logging.getLogger(__name__)
 
