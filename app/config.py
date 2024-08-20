@@ -4,7 +4,9 @@ import dotenv
 
 dotenv.load_dotenv()
 
+# Redis config
 REDIS_CONN = os.environ["REDIS_CONN"]
+REDIS_PASSWORD = os.environ["REDIS_PASSWORD"]
 
 # Gunicorn config
 GUNICORN_BIND = os.environ.get("GUNICORN_BIND", "0.0.0.0:3579")

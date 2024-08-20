@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def get_cached_menu (day: str) -> str | None:
     try:
-        conn = redis.Redis(config.REDIS_CONN)
+        conn = redis.Redis(config.REDIS_CONN, password=config.REDIS_PASSWORD)
 
         return conn.get(f"{REDIS_PREFIX}:{day}")
 
@@ -21,7 +21,7 @@ def get_cached_menu (day: str) -> str | None:
 
 def set_menu_on_cache (results: dict[str, Any]) -> bool:
     try:
-        conn = redis.Redis(config.REDIS_CONN)
+        conn = redis.Redis(config.REDIS_CONN, password=config.REDIS_PASSWORD)
 
         for day, value in results.items():
             conn.set(f"{REDIS_PREFIX}:{day}", json.dumps(value))
