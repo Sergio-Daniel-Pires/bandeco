@@ -1,4 +1,4 @@
-from python:3.11-slim
+from python:3.12-slim
 
 # Fix pt_BR locale
 RUN apt-get update
@@ -14,11 +14,12 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/app/ms-playwright
 
 WORKDIR /bandeco
 
+# FIXME need to install from pypi when updated
 # Install requirements
-COPY requirements.txt whatsapp_bot-0.1.0-py3-none-any.whl ./
+COPY pyproject.toml python_whatsapp_wrapper-0.0.12-py3-none-any.whl ./
 
-RUN pip install -r requirements.txt
-RUN pip install whatsapp_bot-0.1.0-py3-none-any.whl
+RUN pip install .[bot]
+RUN pip install python_whatsapp_wrapper-0.0.12-py3-none-any.whl
 
 # Install playwright deps
 RUN apt-get update

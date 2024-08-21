@@ -1,17 +1,32 @@
 services:
-  bandeco-bot:
-    container_name: bandeco-bot
+  whatsapp-bot-gateway:
+    container_name: whatsapp-bot-gateway
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: gateway.Dockerfile
     ports:
       - "3579:3579"
     networks:
       - network
     volumes:
+      - .:/whatsapp-bot-gateway
+    restart: always
+    command: ["gunicorn", "--chdir", "app/", "-c", "app/gunicorn_config.py", "gateway:app"]
+
+  bandeco-bot:
+    container_name: bandeco-bot
+    build:
+      context: .
+      dockerfile: bandeco.Dockerfile
+    networks:
+      - network
+    volumes:
       - .:/bandeco
     restart: always
-    command: ["gunicorn", "--chdir", "app/", "-c", "app/gunicorn_config.py", "wsgi:app"]
+    # Needs to wait for whatsapp-bot-gateway to be up
+    depends_on:
+      - whatsapp-bot-gateway
+    command: ["python3", "app/bandeco_bot.py"]
 
 networks:
   network:

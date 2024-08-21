@@ -1,0 +1,39 @@
+[project]
+name = "bandeco-bot"
+requires-python = ">=3.10"
+authors = [{ name="Sergio Pires", email="sergiodanpires@gmail.com" }]
+description = "A whatsapp bot that send Unicamp university restaurant menu for users"
+readme = "README.md"
+license = { file = "LICENSE" }
+keywords = ["python", "whatsapp", "chatbot", "api"]
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12"
+]
+dynamic = ["version"]
+dependencies = [
+  "flask>=3.0.3",
+  "dataclasses_json>=0.6.6",
+  "requests==2.31.0",
+  "redis==5.0.4",
+  "requests==2.31.0",
+  "pytz==2021.3",
+  "python-dotenv==1.0.0"
+]
+
+[tool.setuptools]
+packages = []
+
+[project.urls]
+repository = "https://github.com/Sergio-Daniel-Pires/bandeco"
+
+[project.optional-dependencies]
+bot = [
+  "playwright==1.41.2"
+]
+gateway = [
+  "gunicorn==22.0.0",
+  "gevent==24.2.1"
+]
