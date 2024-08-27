@@ -42,8 +42,7 @@ async def main ():
         headers={ "Content-Type": "application/json" },
         json = {
             "bot_number": config.WHATSAPP_BOT_NUMBER,
-            "status": "1",
-            "token": config.WHATSAPP_GATEWAY_TOKEN
+            "status": "1", "token": config.WHATSAPP_GATEWAY_TOKEN
         }
     )
 
