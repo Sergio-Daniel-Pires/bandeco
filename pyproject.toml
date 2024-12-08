@@ -20,7 +20,8 @@ dependencies = [
   "redis==5.0.4",
   "requests==2.31.0",
   "pytz==2021.3",
-  "python-dotenv==1.0.0"
+  "python-dotenv==1.0.0",
+  "python-whatsapp-wrapper==0.1.8"
 ]
 
 [tool.setuptools]

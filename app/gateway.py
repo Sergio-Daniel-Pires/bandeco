@@ -2,7 +2,7 @@ import logging
 
 import config
 import flask
-from redis import Redis
+import redis
 from whatsapp.bot import WhatsappBot
 from whatsapp.error import VerificationFailed
 from whatsapp.messages import Incoming
@@ -17,18 +17,28 @@ logger = logging.getLogger(__name__)
 
 class WhatsappBotGateway(WhatsappBot):
     @property
-    def redis_conn(self):
-        return Redis(host=config.REDIS_CONN, password=config.REDIS_PASSWORD)
+    def redis_conn(self) -> redis.Redis:
+        return redis.Redis(host=config.REDIS_CONN, password=config.REDIS_PASSWORD)
 
-    def enqueue_update(self, update: Incoming):
-        bot_number = update.metadata.display_phone_number
+    def enqueue_update (self, update: Incoming):
+        if update.message is None:
+            return
 
-        bot_allowed = self.redis_conn.get(f"whatsapp:registered:bots:{bot_number}")
+        business_wa_id = update.metadata.display_phone_number
+        customer_wa_id = update.message.from_
 
-        if not bot_allowed:
-            logger.error(f"Bot {bot_number} is not allowed to send/receive messages")
-        
-        self.redis_conn.lpush(f"whatsapp:updates:{bot_number}", update.to_json())
+        has_multiple_workers = self.redis_conn.get(f"whatsapp:config:shared_workers:{business_wa_id}")
+
+        customer_key = f"{business_wa_id}:{customer_wa_id}"
+
+        if has_multiple_workers:
+            self.redis_conn.sadd(config.QUEUES_WITH_TASKS, customer_key)
+            queue_name = f"whatsapp:updates:{customer_key}"
+
+        else:
+            queue_name = f"whatsapp:updates:{business_wa_id}"
+
+        self.redis_conn.rpush(queue_name, update.to_json())
 
     def create_app(self, flask_config: object = None) -> flask.Flask:
         app = super().create_app(flask_config)
@@ -38,24 +48,26 @@ class WhatsappBotGateway(WhatsappBot):
         def register_bot ():
             data = flask.request.json
 
-            bot_number = data.get("bot_number")
-            bot_status = data.get("status")
+            business_number = data.get("bot_number")
+            shared_workers = data.get("shared_workers")
             token = data.get("token")
 
             if token != config.WHATSAPP_GATEWAY_TOKEN:
                 raise VerificationFailed("Invalid token")
 
-            if bot_status == "1":
-                self.redis_conn.set(f"whatsapp:registered:bots:{bot_number}", "1")
-                message = f"Bot {bot_number} allowed successfully!"
+            if shared_workers not in ( "1", "0" ):
+                raise ValueError("Invalid shared_workers value")
 
-            else:
-                self.redis_conn.set(f"whatsapp:registered:bots:{bot_number}", "0")
-                message = f"Bot {bot_number} disallowed successfully!"
+            self.redis_conn.set(f"whatsapp:config:shared_workers:{business_number}", shared_workers)
+
+            message = (
+                f"Bot {business_number} registered successfully" if shared_workers == "1"
+                else f"Bot {business_number} unregistered successfully"
+            )
 
             logger.info(message)
             return { "message": message }
-        
+
         return app
 
 gateway = WhatsappBotGateway(
