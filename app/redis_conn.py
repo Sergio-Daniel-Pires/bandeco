@@ -83,16 +83,17 @@ def redis_lock(redis_client: redis.Redis, lock_name: str, timeout: float):
                 break
 
     try:
-        if not acquired:
+        if acquired:
+            logging.info(f"Acquired lock '{lock_name}'.")
+            renew_thread = threading.Thread(target=renew_lock, daemon=True)
+            renew_thread.start()
+
+            yield True
+
+        else:
             logging.info(f"Can't acquire lock '{lock_name}'. Another worker may be processing.")
 
             yield False
-
-        logging.info(f"Acquired lock '{lock_name}'.")
-        renew_thread = threading.Thread(target=renew_lock, daemon=True)
-        renew_thread.start()
-
-        yield True
 
     finally:
         if acquired:
