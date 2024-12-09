@@ -27,6 +27,7 @@ jobs:
           echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
           echo "WHATSAPP_API_TOKEN=${{ secrets.WHATSAPP_API_TOKEN }}" >> .env
           echo "WHATSAPP_VERIFY_TOKEN=${{ secrets.WHATSAPP_VERIFY_TOKEN }}" >> .env
+          echo "WHATSAPP_GATEWAY_TOKEN=${{ secrets.WHATSAPP_GATEWAY_TOKEN }}" >> .env
 
           # Rebuild docker compose
           docker compose down

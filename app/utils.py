@@ -109,31 +109,35 @@ def get_dates_until_next_sunday(start_date: dt.datetime | None = None):
     ]
 
 async def verify_this_week_and_get_fish () -> tuple[bool, str]:
-    remaining_days = get_dates_until_next_sunday()
-    fish_days = []
+    try:
+        remaining_days = get_dates_until_next_sunday()
+        fish_days = []
 
-    for date in remaining_days:
-        menu = await get_or_insert_menu_in_cache(date)
+        for date in remaining_days:
+            menu = await get_or_insert_menu_in_cache(date)
 
-        for title, values in menu.items():
-            protein = values.get("protein", "").lower()
+            for title, values in menu.items():
+                protein = values.get("protein", "").lower()
 
-            if ("peixe" in protein or "pesca" in protein) and protein is not None:
-                parsed_date = dt.datetime.strptime(date, "%Y-%m-%d")
-                weekday = parsed_date.strftime("%A")
-                user_friendly_date = parsed_date.strftime("%d/%m")
-                food_time = "Jantar" if "jantar" in title.lower() else "Almoço"
+                if ("peixe" in protein or "pesca" in protein) and protein is not None:
+                    parsed_date = dt.datetime.strptime(date, "%Y-%m-%d")
+                    weekday = parsed_date.strftime("%A")
+                    user_friendly_date = parsed_date.strftime("%d/%m")
+                    food_time = "Jantar" if "jantar" in title.lower() else "Almoço"
 
-                fish_days.append(
-                    f"{food_time} na {weekday.capitalize()} ({user_friendly_date}): "
-                    f"{protein.capitalize()}"
-                )
+                    fish_days.append(
+                        f"{food_time} de {weekday.capitalize()} ({user_friendly_date}): "
+                        f"{protein.capitalize()}"
+                    )
 
-    if len(fish_days) == 0:
-        return False, "Ótima noticia! Não tem peixe essa semana."
+        if len(fish_days) == 0:
+            return True, "Ótima noticia! Não tem peixe essa semana. 🎣"
 
-    output_msg = "🐟 Para tristeza geral da nação, teremos peixe essa semana:\n\n"
-    output_msg += "Dias de peixe:\n* "
-    output_msg += "\n* ".join(fish_days)
+        output_msg = "🐟 Para tristeza geral da nação, teremos peixe essa semana:\n\n"
+        output_msg += "Dias de peixe:\n* "
+        output_msg += "\n* ".join(fish_days)
 
-    return True, output_msg
+        return True, output_msg
+
+    except Exception as exc:
+        return False, f"Erro: {exc}, Contate o suporte."

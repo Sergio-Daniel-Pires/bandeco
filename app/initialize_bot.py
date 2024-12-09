@@ -31,7 +31,7 @@ async def get_today (bot: WhatsappBot, incoming: Incoming) -> int:
         "Caso queira me ajudar a manter o bot, pode escrever `/doar`"
     )
     warning_msg = TextMessage.to_send(incoming.message.from_, warning_msg, True)
-    await bot.send_message(warning_msg, incoming.metadata.phone_number_id)
+    # await bot.send_message(warning_msg, incoming.metadata.phone_number_id)
 
     return START
 
@@ -61,7 +61,6 @@ async def verify_fish_in_menu (bot: WhatsappBot, incoming: Incoming) -> int:
 
     if not success:
         logger.error(f"Error getting menu: {fish_menu_msg}")
-        logger.error(f"Message: {message}")
 
     message = incoming.message.to_send(incoming.message.from_, fish_menu_msg)
     await bot.send_message(message, incoming.metadata.phone_number_id)

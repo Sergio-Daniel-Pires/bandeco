@@ -11,8 +11,8 @@ from initialize_bot import initialize_bot
 from whatsapp import messages
 from whatsapp.bot import WhatsappBot
 
-from app import config
-from app.redis_conn import LOCK_TIMEOUT, redis_lock
+import config
+from redis_conn import LOCK_TIMEOUT, redis_lock
 
 # Lock expiration time in seconds
 LOCK_TIMEOUT = 3
@@ -51,16 +51,21 @@ async def _process_update (
     :param max_time: The maximum time (in seconds) to process items from the queue.
     """
     start_time = time.time()
-    queue_key = f'queue:{queue_name}'
     logging.info(f"Starting processing of queue '{queue_name}' for up to {max_time} seconds.")
 
     while time.time() - start_time < max_time:
-        item = redis_client.lpop(queue_key)
+        item = redis_client.lpop(queue_name)
 
         if item is None:
             break
 
-        await bot.process_update(messages.Incoming.from_json(item))
+        try:
+            await bot.process_update(messages.Incoming.from_json(item))
+
+        except Exception as exc:
+            logging.error(exc)
+
+    logging.info("Max time reached or no tasks in queue")
 
 async def main ():
     bot = BotPublisher(
@@ -91,13 +96,14 @@ async def main ():
             continue
 
         for customer_key in customer_with_jobs:
+            customer_key = customer_key.decode("utf-8")
             lock_name = f"whatsapp:lock:{customer_key}"
 
             # Attempt to acquire the lock for the queue
             with redis_lock(bot.redis_conn, lock_name, LOCK_TIMEOUT) as acquired:
                 if not acquired:
-                    logging.debug(f"Cannot acquire lock for queue '{customer_key}'.")
-                    
+                    logging.warning(f"Cannot acquire lock for queue '{customer_key}'.")
+
                     continue
 
                 # Remove the queue from the global set
@@ -109,15 +115,16 @@ async def main ():
                     )
 
                 else:
-                    logging.info(f"Queue '{customer_key}' was removed by another worker.")
+                    logging.warning(f"Queue '{customer_key}' was removed by another worker.")
 
                 try:
                     # Process the queue for a limited time
                     queue_name = f"whatsapp:updates:{customer_key}"
-                    await _process_update(bot.redis_conn, queue_name, max_time=1)
+                    await _process_update(bot.redis_conn, queue_name, 1, bot)
 
                     # Check if there are remaining tasks in the queue
-                    remaining = bot.redis_conn.llen(f'queue:{queue_name}')
+                    remaining = bot.redis_conn.llen(queue_name)
+
                     if remaining > 0:
                         bot.redis_conn.sadd(config.QUEUES_WITH_TASKS, queue_name)
                         logging.debug(

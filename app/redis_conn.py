@@ -9,7 +9,7 @@ from typing import Any
 import config
 import redis
 
-from app import config
+import config
 
 # Lock expiration time in seconds
 LOCK_TIMEOUT = 3
@@ -67,14 +67,17 @@ def redis_lock(redis_client: redis.Redis, lock_name: str, timeout: float):
             try:
                 current_token = redis_client.get(lock_name)
 
-                if current_token and current_token == lock_token:
+                if current_token and current_token.decode("utf-8") == lock_token:
                     redis_client.expire(lock_name, timeout)
-                    logging.info(f"Renewed lock '{lock_name}' for {timeout} seconds.")
+                    logging.debug(f"Renewed lock '{lock_name}' for {timeout} seconds.")
+
                 else:
-                    logging.info(
+                    logging.warning(
                         f"Can't renew lock '{lock_name}'. Another worker may have acquired it."
                     )
+
                     break
+
             except Exception as e:
                 logging.error(f"Error in lock '{lock_name}' renewing: {e}")
                 break
@@ -98,7 +101,7 @@ def redis_lock(redis_client: redis.Redis, lock_name: str, timeout: float):
             if renew_thread:
                 renew_thread.join()
 
-            current_token = redis_client.get(lock_name)
+            current_token = redis_client.get(lock_name).decode("utf-8")
 
             if current_token and current_token == lock_token:
                 redis_client.delete(lock_name)
