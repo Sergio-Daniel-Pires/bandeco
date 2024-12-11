@@ -27,12 +27,15 @@ class WhatsappBotGateway(WhatsappBot):
         business_wa_id = update.metadata.display_phone_number
         customer_wa_id = update.message.from_
 
-        has_multiple_workers = self.redis_conn.get(f"whatsapp:config:shared_workers:{business_wa_id}")
+        
+        multiple_workers_queue = (
+            self.redis_conn.get(f"{config.DEFAULT_QUEUES_WITH_TASKS}:{business_wa_id}")
+        )
 
         customer_key = f"{business_wa_id}:{customer_wa_id}"
 
-        if has_multiple_workers:
-            self.redis_conn.sadd(config.QUEUES_WITH_TASKS, customer_key)
+        if multiple_workers_queue is not None:
+            self.redis_conn.sadd(multiple_workers_queue.decode("utf-8"), customer_key)
             queue_name = f"whatsapp:updates:{customer_key}"
 
         else:
@@ -55,14 +58,13 @@ class WhatsappBotGateway(WhatsappBot):
             if token != config.WHATSAPP_GATEWAY_TOKEN:
                 raise VerificationFailed("Invalid token")
 
-            if shared_workers not in ( "1", "0" ):
-                raise ValueError("Invalid shared_workers value")
-
-            self.redis_conn.set(f"whatsapp:config:shared_workers:{business_number}", shared_workers)
+            self.redis_conn.set(
+                f"{config.DEFAULT_QUEUES_WITH_TASKS}:{business_number}", shared_workers
+            )
 
             message = (
-                f"Bot {business_number} registered successfully" if shared_workers == "1"
-                else f"Bot {business_number} unregistered successfully"
+                f"Bot {business_number} registered successfully to "
+                f"share workers with {shared_workers}"
             )
 
             logger.info(message)

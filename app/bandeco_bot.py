@@ -1,6 +1,7 @@
 import asyncio
 import dataclasses as dc
 import logging
+import multiprocessing
 import time
 
 import config
@@ -8,13 +9,10 @@ import redis
 import requests
 from dataclasses_json import dataclass_json
 from initialize_bot import initialize_bot
+from redis_conn import LOCK_TIMEOUT, redis_lock
 from whatsapp import messages
 from whatsapp.bot import WhatsappBot
-import multiprocessing
 from whatsapp.error import EmptyState
-
-import config
-from redis_conn import LOCK_TIMEOUT, redis_lock
 
 # Lock expiration time in seconds
 LOCK_TIMEOUT = 3
@@ -75,7 +73,7 @@ class BotPublisher (WhatsappBot):
 
         while True:
             # Get all queues with tasks
-            customer_with_jobs = self.redis_conn.smembers(config.QUEUES_WITH_TASKS)
+            customer_with_jobs = self.redis_conn.smembers(config.DEFAULT_QUEUES_WITH_TASKS)
 
             if not customer_with_jobs:
                 time.sleep(0.1)
@@ -94,11 +92,11 @@ class BotPublisher (WhatsappBot):
                         continue
 
                     # Remove the queue from the global set
-                    removed = self.redis_conn.srem(config.QUEUES_WITH_TASKS, customer_key)
+                    removed = self.redis_conn.srem(config.DEFAULT_QUEUES_WITH_TASKS, customer_key)
 
                     if removed:
                         logging.debug(
-                            f"Queue '{customer_key}' removed from '{config.QUEUES_WITH_TASKS}'."
+                            f"Queue '{customer_key}' removed from '{config.DEFAULT_QUEUES_WITH_TASKS}'."
                         )
 
                     else:
@@ -113,10 +111,10 @@ class BotPublisher (WhatsappBot):
                         remaining = self.redis_conn.llen(queue_name)
 
                         if remaining > 0:
-                            self.redis_conn.sadd(config.QUEUES_WITH_TASKS, queue_name)
+                            self.redis_conn.sadd(config.DEFAULT_QUEUES_WITH_TASKS, queue_name)
                             logging.debug(
                                 f"Queue '{queue_name}' added back to global "
-                                f"'{config.QUEUES_WITH_TASKS}' with {remaining} jobs remaining."
+                                f"'{config.DEFAULT_QUEUES_WITH_TASKS}' with {remaining} jobs remaining."
                             )
 
                     except Exception as e:
@@ -142,7 +140,7 @@ def create_bot ():
             headers={ "Content-Type": "application/json" },
             json = {
                 "bot_number": config.WHATSAPP_BOT_NUMBER,
-                "shared_workers": "1", "token": config.WHATSAPP_GATEWAY_TOKEN
+                "shared_workers": config.DEFAULT_QUEUES_WITH_TASKS, "token": config.WHATSAPP_GATEWAY_TOKEN
             }
         )
 

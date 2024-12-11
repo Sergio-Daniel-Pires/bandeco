@@ -19,4 +19,4 @@ WHATSAPP_API_TOKEN = os.environ["WHATSAPP_API_TOKEN"]
 WHATSAPP_VERIFY_TOKEN = os.environ["WHATSAPP_VERIFY_TOKEN"]
 WHATSAPP_GATEWAY_TOKEN = os.environ["WHATSAPP_GATEWAY_TOKEN"]
 
-QUEUES_WITH_TASKS = ':whatsapp:shared_workers_queue'
+DEFAULT_QUEUES_WITH_TASKS = "whatsapp:shared_workers_queue"

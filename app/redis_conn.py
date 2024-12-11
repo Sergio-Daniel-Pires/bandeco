@@ -9,8 +9,6 @@ from typing import Any
 import config
 import redis
 
-import config
-
 # Lock expiration time in seconds
 LOCK_TIMEOUT = 3
 

@@ -28,6 +28,7 @@ jobs:
           echo "WHATSAPP_API_TOKEN=${{ secrets.WHATSAPP_API_TOKEN }}" >> .env
           echo "WHATSAPP_VERIFY_TOKEN=${{ secrets.WHATSAPP_VERIFY_TOKEN }}" >> .env
           echo "WHATSAPP_GATEWAY_TOKEN=${{ secrets.WHATSAPP_GATEWAY_TOKEN }}" >> .env
+          echo "WHATSAPP_BOT_NUMBER=5519992346696" >> .env
 
           # Rebuild docker compose
           docker compose down
